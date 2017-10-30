@@ -1,6 +1,6 @@
 
 /.idea/workspace.xml
-/PolyQ/*.inp
-/PolyQ/*.log
+/singleRun/*.inp
+/singleRun/*.log
 /batchRun/*.inp
 /batchRun/*.log

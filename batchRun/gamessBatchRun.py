@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 27OCT2017
+Last updated : 30OCT2017
 
 In linux, always run this script as a superuser (su or sudo).
 This script is designed to run all GAMESS .inp files in the directory from which the script is run.
