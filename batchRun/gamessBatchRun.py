@@ -6,6 +6,9 @@ Last updated : 30OCT2017
 In linux, always run this script as a superuser (su or sudo).
 This script is designed to run all GAMESS .inp files in the directory from which the script is run.
 It will not double-process data if a .log file for the data set is present.
+
+To run this script:
+sudo python3 gamessBatchRun.py
 """
 
 import datetime
@@ -54,7 +57,9 @@ def process_data(input_file, number_of_processors=4):
 
     # Run GAMESS job
     logging.info("Beginning GAMESS process.")
-    subprocess.call(["./rungms", input_file, VERSION, str(number_of_processors), output_name])
+    output_log = open(output_name, 'w')
+    subprocess.call(["./rungms", input_file, VERSION, str(number_of_processors)], stdout=output_log)
+    output_log.close()
     logging.info("GAMESS process complete.")
 
     # Clean up files from run and copy output to input directory
@@ -62,6 +67,7 @@ def process_data(input_file, number_of_processors=4):
         os.remove(os.path.join(PATH_TO_GAMESS, input_file))
         shutil.copyfile(os.path.join(PATH_TO_GAMESS, output_name), os.path.join(input_directory, output_name))
         logging.info("Output file copied to starting directory.")
+        os.remove(os.path.join(PATH_TO_GAMESS, output_name))
     except FileNotFoundError:
         logging.warning("Output file not found.")
     finally:
@@ -71,11 +77,15 @@ def process_data(input_file, number_of_processors=4):
 def main():
     # Set up log file for batch process. NOTE: this is different than the GAMESS .log files.
     log_filename = DATETIME + ".log"
-    logging.basicConfig(filename=log_filename,
-                        level=logging.INFO,
-                        format='%(asctime)s: %(levelname)s: %(message)s')
 
-    logging.info("Beginning log for batch started {}.".format(DATETIME))
+    file_out = logging.FileHandler(log_filename)
+    console_out = logging.StreamHandler()
+    handlers = [file_out, console_out]
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s: %(levelname)s: %(message)s',
+                        handlers=handlers)
+
+    logging.info("Beginning log for batch started {}.".format(DATETIME.replace("_", ":")))
 
     # Read all files in working directory
     data_sets = []
@@ -103,7 +113,7 @@ def main():
         logging.info("Beginning GAMESS job for {}.".format(input_file))
 
         start_time = time.clock()
-        process_data(input_file)
+        process_data(input_file, 4)
         end_time = time.clock()
 
         logging.info("GAMESS job for {} complete.".format(input_file))

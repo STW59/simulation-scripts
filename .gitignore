@@ -4,3 +4,4 @@
 /singleRun/*.log
 /batchRun/*.inp
 /batchRun/*.log
+/batchRun/test_data/

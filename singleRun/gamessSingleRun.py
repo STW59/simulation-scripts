@@ -6,6 +6,7 @@ Last updated : 30OCT2017
 In linux, always run this script as a superuser (su or sudo).
 This script is designed to run all GAMESS .inp files in the directory from which the script is run.
 It will not double-process data if a .log file for the data set is present.
+
 To run this script:
 sudo python3 gamessSingleRun.py filename.inp number_of_processors
 """
@@ -61,12 +62,15 @@ for file in temp_binary_files:
         os.remove(os.path.join(TEMP_BINARY_DIR, file))
 
 # Run GAMESS job
-subprocess.call(["./rungms", input_file, VERSION, str(number_of_processors), output_name])
+output_log = open(output_name, 'w')
+subprocess.call(["./rungms", input_file, VERSION, str(number_of_processors)], stdout=output_log)
+output_log.close()
 
 # Clean up files from run and copy output to input directory
 try:
     os.remove(os.path.join(PATH_TO_GAMESS, input_file))
     shutil.copyfile(os.path.join(PATH_TO_GAMESS, output_name), os.path.join(input_directory, output_name))
+    os.remove(os.path.join(PATH_TO_GAMESS, output_name))
 except FileNotFoundError:
     pass
 
