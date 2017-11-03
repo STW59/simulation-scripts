@@ -5,3 +5,7 @@
 /batchRun/*.inp
 /batchRun/*.log
 /batchRun/test_data/
+/smina/*.sdf
+/smina/*.pdb
+/smina/*.log
+/smina/README
