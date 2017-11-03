@@ -12,3 +12,5 @@
 /.idea/misc.xml
 /.idea/simulation-scripts.iml
 /.idea/codeStyleSettings.xml
+/smina/smina.static
+/smina/multi_smina.py
