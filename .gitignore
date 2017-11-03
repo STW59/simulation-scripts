@@ -9,3 +9,6 @@
 /smina/*.pdb
 /smina/*.log
 /smina/README
+/.idea/misc.xml
+/.idea/simulation-scripts.iml
+/.idea/codeStyleSettings.xml

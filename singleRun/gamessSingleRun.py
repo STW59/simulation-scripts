@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 30OCT2017
+Last updated : 03NOV2017
 
-In linux, always run this script as a superuser (su or sudo).
-This script is designed to run all GAMESS .inp files in the directory from which the script is run.
-It will not double-process data if a .log file for the data set is present.
+This script is designed to run all GAMESS .inp files in the directory from
+which the script is run. It will not double-process data if a .log file for the
+data set is present.
 
 To run this script:
 sudo python3 gamessSingleRun.py filename.inp number_of_processors
+In linux, always run this script as a superuser (su or sudo).
 """
 
 import os
@@ -45,7 +46,8 @@ input_directory = os.getcwd()
 
 # Copy input file to GAMESS directory
 try:
-    shutil.copyfile(os.path.join(input_directory, input_file), os.path.join(PATH_TO_GAMESS, input_file))
+    shutil.copyfile(os.path.join(input_directory, input_file),
+                    os.path.join(PATH_TO_GAMESS, input_file))
 except FileNotFoundError:
     print("{} NOT FOUND IN DIRECTORY. TERMINATING.".format(input_file))
     exit()
@@ -63,13 +65,15 @@ for file in temp_binary_files:
 
 # Run GAMESS job
 output_log = open(output_name, 'w')
-subprocess.call(["./rungms", input_file, VERSION, str(number_of_processors)], stdout=output_log)
+subprocess.call(["./rungms", input_file, VERSION, str(number_of_processors)],
+                stdout=output_log)
 output_log.close()
 
 # Clean up files from run and copy output to input directory
 try:
     os.remove(os.path.join(PATH_TO_GAMESS, input_file))
-    shutil.copyfile(os.path.join(PATH_TO_GAMESS, output_name), os.path.join(input_directory, output_name))
+    shutil.copyfile(os.path.join(PATH_TO_GAMESS, output_name),
+                    os.path.join(input_directory, output_name))
     os.remove(os.path.join(PATH_TO_GAMESS, output_name))
 except FileNotFoundError:
     pass

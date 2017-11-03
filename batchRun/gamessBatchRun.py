@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 30OCT2017
+Last updated : 03NOV2017
 
-In linux, always run this script as a superuser (su or sudo).
-This script is designed to run all GAMESS .inp files in the directory from which the script is run.
-It will not double-process data if a .log file for the data set is present.
+This script is designed to run all GAMESS .inp files in the directory from
+which the script is run. It will not double-process data if a .log file for the
+data set is present.
 
 To run this script:
 sudo python3 gamessBatchRun.py
+In linux, always run this script as a superuser (su or sudo).
 """
 
 import datetime
@@ -35,7 +36,8 @@ def process_data(input_file, number_of_processors=4):
     # Copy input file to GAMESS directory
     try:
         logging.debug("Copying input data file to GAMESS directory.")
-        shutil.copyfile(os.path.join(input_directory, input_file), os.path.join(PATH_TO_GAMESS, input_file))
+        shutil.copyfile(os.path.join(input_directory, input_file),
+                        os.path.join(PATH_TO_GAMESS, input_file))
     except FileNotFoundError:
         logging.error("{} not found in GAMESS directory. Moving to next file.")
         return
@@ -47,25 +49,29 @@ def process_data(input_file, number_of_processors=4):
     for file in supp_out_files:
         if file.startswith(name):
             os.remove(os.path.join(SUPP_OUTPUT_DIR, file))
-            logging.warning("Removed {} from supplemental output directory.".format(file))
+            logging.warning("Removed {} from supplemental output directory."
+                            .format(file))
 
     temp_binary_files = os.listdir(TEMP_BINARY_DIR)
     for file in temp_binary_files:
         if file.startswith(name):
             os.remove(os.path.join(TEMP_BINARY_DIR, file))
-            logging.warning("Removed {} from temporary binary directory.".format(file))
+            logging.warning("Removed {} from temporary binary directory."
+                            .format(file))
 
     # Run GAMESS job
     logging.info("Beginning GAMESS process.")
     output_log = open(output_name, 'w')
-    subprocess.call(["./rungms", input_file, VERSION, str(number_of_processors)], stdout=output_log)
+    subprocess.call(["./rungms", input_file, VERSION,
+                     str(number_of_processors)], stdout=output_log)
     output_log.close()
     logging.info("GAMESS process complete.")
 
     # Clean up files from run and copy output to input directory
     try:
         os.remove(os.path.join(PATH_TO_GAMESS, input_file))
-        shutil.copyfile(os.path.join(PATH_TO_GAMESS, output_name), os.path.join(input_directory, output_name))
+        shutil.copyfile(os.path.join(PATH_TO_GAMESS, output_name),
+                        os.path.join(input_directory, output_name))
         logging.info("Output file copied to starting directory.")
         os.remove(os.path.join(PATH_TO_GAMESS, output_name))
     except FileNotFoundError:
@@ -75,7 +81,8 @@ def process_data(input_file, number_of_processors=4):
 
 
 def main():
-    # Set up log file for batch process. NOTE: this is different than the GAMESS .log files.
+    # Set up log file for batch process.
+    # NOTE: this is different than the GAMESS .log files.
     log_filename = DATETIME + ".log"
 
     file_out = logging.FileHandler(log_filename)
@@ -85,7 +92,8 @@ def main():
                         format='%(asctime)s: %(levelname)s: %(message)s',
                         handlers=handlers)
 
-    logging.info("Beginning log for batch started {}.".format(DATETIME.replace("_", ":")))
+    logging.info("Beginning log for batch started {}."
+                 .format(DATETIME.replace("_", ":")))
 
     # Read all files in working directory
     data_sets = []
@@ -104,20 +112,23 @@ def main():
     for data_set in data_sets:
         if (data_set.split(".inp")[0] + ".log") in processed_data_sets:
             data_sets.remove(data_set)
-            logging.info("{} already processed. Removing from queue.".format(data_set))
+            logging.info("{} already processed. Removing from queue."
+                         .format(data_set))
     data_sets.sort()
     logging.debug("Processed files removed from queue.")
 
     # Run each unprocessed input file
     for input_file in data_sets:
-        logging.info("Beginning GAMESS job for {}.".format(input_file))
+        logging.info("Beginning GAMESS job for {}."
+                     .format(input_file))
 
         start_time = time.clock()
         process_data(input_file, 4)
         end_time = time.clock()
 
         logging.info("GAMESS job for {} complete.".format(input_file))
-        logging.info("Run time: {} hours.".format((end_time - start_time) / (60 * 60)))
+        logging.info("Run time: {} hours.".
+                     format((end_time - start_time) / (60 * 60)))
 
     logging.info("Batch process complete.")
 
