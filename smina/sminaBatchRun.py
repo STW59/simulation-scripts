@@ -11,6 +11,7 @@ python3 sminaBatchRun.py
 
 import datetime
 import logging
+import os
 import subprocess
 import time
 
@@ -22,14 +23,15 @@ THREADS = 3
 
 def process_data(test_compound, protein_ligand, ligand):
     name = test_compound.split(".sdf")[0]
-    output_name = name + "_output.sdf"
-    output_log_name = name + ".log"
+    output_name = os.path.join("output", name + "_output.sdf")
+    output_log_name = os.path.join("output", name + ".log")
 
     # Run Smina job
     logging.info("Beginning Smina process.")
     output_log = open(output_log_name, 'w')
-    subprocess.call(["python ./multi_smina.py -l {} -o {} -c {} smina.static -r {}"
-                    .format(ligand, output_name, THREADS, protein_ligand)], shell=True, stdout=output_log)
+    subprocess.call(["./{} -r {} -l {} --autobox_ligand {} -o {} --flexdist_ligand {}"
+                     .format(SMINA_EXECUTABLE, protein_ligand, test_compound, ligand, output_name, ligand)],
+                    shell=True, stdout=output_log)
     output_log.close()
     logging.info("Smina process complete.")
 
@@ -50,17 +52,17 @@ def main():
     # Set up input data files
     protein = "REC.pdb"
     ligand = "LIG.sdf"
-    test_compounds = ["compound_1.sdf"]
-    # test_compounds = ["compound_1.sdf",
-    #                   "compound_2.sdf",
-    #                   "compound_3.sdf",
-    #                   "compound_4.sdf",
-    #                   "compound_5.sdf",
-    #                   "compound_6.sdf",
-    #                   "compound_7.sdf",
-    #                   "compound_8.sdf",
-    #                   "compound_9.sdf",
-    #                   "compound_10.sdf"]
+    # test_compounds = ["compound_1.sdf"]
+    test_compounds = ["compound_1.sdf",
+                      "compound_2.sdf",
+                      "compound_3.sdf",
+                      "compound_4.sdf",
+                      "compound_5.sdf",
+                      "compound_6.sdf",
+                      "compound_7.sdf",
+                      "compound_8.sdf",
+                      "compound_9.sdf",
+                      "compound_10.sdf"]
 
     logging.info("Protein file: {}".format(protein))
     logging.info("Ligand file: {}".format(ligand))
