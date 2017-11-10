@@ -18,7 +18,7 @@ import time
 # Constants that should be edited based on your system
 DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
 SMINA_EXECUTABLE = "smina.static"
-TEST = True  # Set to True if you are testing SMINA configurations or debugging
+TEST = False  # Set to True if you are testing SMINA configurations or debugging
 
 
 def process_data(test_compound, protein_ligand, ligand):
@@ -26,7 +26,7 @@ def process_data(test_compound, protein_ligand, ligand):
     output_name = os.path.join("output", name + "_output.sdf")
     output_log_name = os.path.join("output", name + ".log")
 
-    flex_distance = 15.0
+    flex_distance = 7.5
     seed = 0
     exhaustiveness = 32
     scoring = "vinardo"
@@ -44,11 +44,12 @@ def process_data(test_compound, protein_ligand, ligand):
                                 output_name, seed, exhaustiveness)],
                         shell=True, stdout=output_log)
     else:
-        subprocess.call(["./{} --receptor {} --ligand {} --autobox_ligand {} "
+        subprocess.call(["./{} --receptor {} --ligand {} --flexdist {} "
+                         "--flexdist_ligand {} --autobox_ligand {} "
                          "--scoring {} --out {} --seed {} --exhaustiveness {}"
                         .format(SMINA_EXECUTABLE, protein_ligand, test_compound,
-                                ligand, scoring, output_name, seed,
-                                exhaustiveness)],
+                                flex_distance, ligand, ligand, scoring,
+                                output_name, seed, exhaustiveness)],
                         shell=True, stdout=output_log)
 
     output_log.close()
