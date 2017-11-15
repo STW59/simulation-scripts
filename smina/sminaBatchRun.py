@@ -26,7 +26,7 @@ def process_data(test_compound, protein_ligand, ligand):
     output_name = os.path.join("output", name + "_output.sdf")
     output_log_name = os.path.join("output", name + ".log")
 
-    flex_distance = 7.5
+    flex_distance = 3.5
     seed = 0
     exhaustiveness = 32
     scoring = "vinardo"
