@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 03NOV2017
+Last updated : 21NOV2017
 
 This script is designed to run all GAMESS .inp files in the directory from
 which the script is run. It will not double-process data if a .log file for the
@@ -122,9 +122,9 @@ def main():
         logging.info("Beginning GAMESS job for {}."
                      .format(input_file))
 
-        start_time = time.clock()
+        start_time = time.time()
         process_data(input_file, 4)
-        end_time = time.clock()
+        end_time = time.time()
 
         logging.info("GAMESS job for {} complete.".format(input_file))
         logging.info("Run time: {} hours.".

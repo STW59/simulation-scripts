@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 03NOV2017
+Last updated : 21NOV2017
 
 This script is designed to run all GAMESS .inp files in the directory from
 which the script is run. It will not double-process data if a .log file for the
@@ -18,7 +18,7 @@ import subprocess
 import sys
 import time
 
-start_time = time.clock()
+start_time = time.time()
 
 # Constants that should be edited based on your system
 PATH_TO_GAMESS = "/home/asher/Programs/gamess/"  # Full path to GAMESS folder
@@ -78,7 +78,7 @@ try:
 except FileNotFoundError:
     pass
 
-end_time = time.clock()
+end_time = time.time()
 
 print(">> COMPLETE.")
 print(">> RUN TIME: {} HOURS".format((end_time - start_time) / (60 * 60)))

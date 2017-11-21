@@ -13,6 +13,7 @@
 /batchRun/*.inp
 /batchRun/*.log
 /batchRun/test_data/
+/batchRun/*.pdb
 
 # Ignored files for SMINA Batch program
 /smina/*.sdf
@@ -21,3 +22,6 @@
 /smina/README
 /smina/smina.static
 /smina/output/
+
+# Ignored working project files
+/batchRun/PhiAngle/A5/
