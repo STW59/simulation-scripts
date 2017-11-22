@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 21NOV2017
+Last updated : 22NOV2017
 
 This script is designed to run all GAMESS .inp files in the directory from
 which the script is run. It will not double-process data if a .log file for the
@@ -28,8 +28,8 @@ DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
 
 
 def process_data(input_file, number_of_processors=4):
-    name = input_file.split(".inp")[0]
-    output_name = name + ".log"
+    name = input_file.split("Input.inp")[0]
+    output_name = name + "Output.log"
 
     input_directory = os.getcwd()
 
