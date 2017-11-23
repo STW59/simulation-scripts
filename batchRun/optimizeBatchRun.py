@@ -115,6 +115,7 @@ def read_atom_coords(gamess_output_name):
                     if output_line is not "\n":
                         atom_coords.append(output_line)
                     else:
+                        logging.debug("Extracted atom coordinates from GAMESS output file.")
                         gamess_output.close()
                         return atom_coords
 
@@ -127,6 +128,7 @@ def read_gamess_header(old_input_name):
             header.append(header_line)
         else:
             header.append(header_line)
+            logging.debug("Extracted header from GAMESS input file.")
             break
     return header
 
@@ -168,6 +170,8 @@ def main():
 
     # Run each unprocessed input file
     for input_file in data_sets:
+        # Generates GAMESS inputs for each of the given basis sets
+        # Subsequently runs the GAMESS calculations for the inputs
         basis_set_index = 0
         for basis_set in B3LYP_BASIS_SETS:
             logging.info("Beginning GAMESS job for {} with {} basis set."
@@ -181,15 +185,13 @@ def main():
             logging.info("Run time: {} hours.".
                          format((end_time - start_time) / (60 * 60)))
 
-            # TODO: Check for "exited gracefully" - Return error and abort if not
-            # TODO: Add logging statements to code
-
             # Create new GAMESS inputs for next basis set
             try:
                 # Determine next basis set
                 basis_set_index += 1
                 next_basis_set = B3LYP_BASIS_SETS[basis_set_index]
             except IndexError:
+                logging.info("All basis sets complete.")
                 # Process next data set
                 return
 
@@ -198,6 +200,21 @@ def main():
             old_input_name = input_file
             new_input_name = name + next_basis_set + "-Input.inp"
             gamess_output_name = name + "Output.log"
+
+            # Check to see if GAMESS "exited gracefully"
+            exited_gracefully = False
+            gamess_output_file = open(gamess_output_name, 'r')
+            for output_line in gamess_output_file:
+                if "exited gracefully" in output_line:
+                    exited_gracefully = True
+            gamess_output_file.close()
+            if not exited_gracefully:
+                logging.warning("GAMESS did not exit gracefully.")
+                logging.warning("Check the GAMESS output file for details.")
+                logging.warning("Continuing to next input file.")
+                break
+
+            logging.info("Generating input for {} basis set.".format(next_basis_set))
 
             # Read required data from files
             gamess_header = read_gamess_header(old_input_name)
@@ -231,6 +248,8 @@ def main():
 
             new_input_file.write(" $END")
             new_input_file.close()
+
+            logging.info("Input generation complete.")
 
             input_file = new_input_name
 
