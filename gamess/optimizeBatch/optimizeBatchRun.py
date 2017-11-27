@@ -3,10 +3,10 @@
 Written by Stephen E. White
 Last updated : 22NOV2017
 
-This script is designed to run all GAMESS .inp files as a series of energy
+This script is designed to run all gamess .inp files as a series of energy
 optimizations running through different levels of DFT basis sets.
 
-This script will run all GAMESS .inp files in the directory from which the
+This script will run all gamess .inp files in the directory from which the
 script is run. It will not double-process data if a .log file for the data
 set is present.
 
@@ -23,10 +23,10 @@ import subprocess
 import time
 
 # Constants that should be edited based on your system
-PATH_TO_GAMESS = "/home/asher/Programs/gamess/"  # Full path to GAMESS folder
+PATH_TO_GAMESS = "/home/asher/Programs/gamess/"  # Full path to gamess folder
 TEMP_BINARY_DIR = "/scr/asher/"  # Directory for binary output files
 SUPP_OUTPUT_DIR = "/home/asher/scr/"  # Directory for supplemental output files
-VERSION = "01"  # Version number for GAMESS
+VERSION = "01"  # Version number for gamess
 
 # Logging constants
 DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
@@ -46,7 +46,7 @@ def build_data_sets():
     processed_data_sets = []
     input_dir_list = os.listdir(os.getcwd())
 
-    # Put GAMESS input and log files into data structures for processing
+    # Put gamess input and log files into data structures for processing
     for file in input_dir_list:
         if file.endswith(".inp"):
             data_sets.append(file)
@@ -71,26 +71,26 @@ def process_data(input_file, number_of_processors=4):
 
     input_directory = os.getcwd()
 
-    # Copy input file to GAMESS directory
+    # Copy input file to gamess directory
     try:
-        logging.debug("Copying input data file to GAMESS directory.")
+        logging.debug("Copying input data file to gamess directory.")
         shutil.copyfile(os.path.join(input_directory, input_file),
                         os.path.join(PATH_TO_GAMESS, input_file))
     except FileNotFoundError:
-        logging.error("{} not found in GAMESS directory. Moving to next file.")
+        logging.error("{} not found in gamess directory. Moving to next file.")
         return
 
     os.chdir(PATH_TO_GAMESS)
 
     remove_residuals(name)
 
-    # Run GAMESS job
-    logging.info("Beginning GAMESS process.")
+    # Run gamess job
+    logging.info("Beginning gamess process.")
     output_log = open(output_name, 'w')
     subprocess.call(["./rungms", input_file, VERSION,
                      str(number_of_processors)], stdout=output_log)
     output_log.close()
-    logging.info("GAMESS process complete.")
+    logging.info("gamess process complete.")
 
     # Clean up files from run and copy output to input directory
     try:
@@ -115,7 +115,7 @@ def read_atom_coords(gamess_output_name):
                     if output_line is not "\n":
                         atom_coords.append(output_line)
                     else:
-                        logging.debug("Extracted atom coordinates from GAMESS output file.")
+                        logging.debug("Extracted atom coordinates from gamess output file.")
                         gamess_output.close()
                         return atom_coords
 
@@ -128,13 +128,13 @@ def read_gamess_header(old_input_name):
             header.append(header_line)
         else:
             header.append(header_line)
-            logging.debug("Extracted header from GAMESS input file.")
+            logging.debug("Extracted header from gamess input file.")
             break
     return header
 
 
 def remove_residuals(name):
-    # Check for and remove all residual files from previous GAMESS runs
+    # Check for and remove all residual files from previous gamess runs
     supp_out_files = os.listdir(SUPP_OUTPUT_DIR)
     for file in supp_out_files:
         if file.startswith(name):
@@ -152,7 +152,7 @@ def remove_residuals(name):
 
 def main():
     # Set up log file for batch process.
-    # NOTE: this is different than the GAMESS .log files.
+    # NOTE: this is different than the gamess .log files.
     log_filename = DATETIME + ".log"
 
     file_out = logging.FileHandler(log_filename)
@@ -170,22 +170,22 @@ def main():
 
     # Run each unprocessed input file
     for input_file in data_sets:
-        # Generates GAMESS inputs for each of the given basis sets
-        # Subsequently runs the GAMESS calculations for the inputs
+        # Generates gamess inputs for each of the given basis sets
+        # Subsequently runs the gamess calculations for the inputs
         basis_set_index = 0
         for basis_set in B3LYP_BASIS_SETS:
-            logging.info("Beginning GAMESS job for {} with {} basis set."
+            logging.info("Beginning gamess job for {} with {} basis set."
                          .format(input_file, basis_set))
 
             start_time = time.time()
             process_data(input_file, 4)
             end_time = time.time()
 
-            logging.info("GAMESS job for {} complete.".format(input_file))
+            logging.info("gamess job for {} complete.".format(input_file))
             logging.info("Run time: {} hours.".
                          format((end_time - start_time) / (60 * 60)))
 
-            # Create new GAMESS inputs for next basis set
+            # Create new gamess inputs for next basis set
             try:
                 # Determine next basis set
                 basis_set_index += 1
@@ -201,7 +201,7 @@ def main():
             new_input_name = name + next_basis_set + "-Input.inp"
             gamess_output_name = name + "Output.log"
 
-            # Check to see if GAMESS "exited gracefully"
+            # Check to see if gamess "exited gracefully"
             exited_gracefully = False
             gamess_output_file = open(gamess_output_name, 'r')
             for output_line in gamess_output_file:
@@ -209,8 +209,8 @@ def main():
                     exited_gracefully = True
             gamess_output_file.close()
             if not exited_gracefully:
-                logging.warning("GAMESS did not exit gracefully.")
-                logging.warning("Check the GAMESS output file for details.")
+                logging.warning("gamess did not exit gracefully.")
+                logging.warning("Check the gamess output file for details.")
                 logging.warning("Continuing to next input file.")
                 break
 
@@ -223,7 +223,7 @@ def main():
             # Open new input file
             new_input_file = open(new_input_name, 'w')
 
-            # Write new GAMESS input file
+            # Write new gamess input file
             for header_line in gamess_header:
                 if "$BASIS" in header_line:
                     if next_basis_set is "6-31G(d)":

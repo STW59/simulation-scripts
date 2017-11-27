@@ -1,22 +1,28 @@
 
 # General files for PyCharm
 /.idea/codeStyleSettings.xml
+.idea/dictionaries/
 /.idea/misc.xml
 /.idea/simulation-scripts.iml
 /.idea/workspace.xml
 
-# Ignored files for GAMESS Single Run
-/singleRun/*.inp
-/singleRun/*.log
+# Ignored files for gamess Single Run
+/gamess/singleRun/*.inp
+/gamess/singleRun/*.log
 
-# Ignored files for GAMESS Batch Run
-/batchRun/*.inp
-/batchRun/*.log
-/batchRun/test_data/
-/batchRun/*.pdb
+# Ignored files for gamess Batch Run
+/gamess/batchRun/*.inp
+/gamess/batchRun/*.log
+/gamess/batchRun/*.pdb
+
+# Ignored files for gamess Oprimization Run
+/gamess/optimizeBatch/*.log
+/gamess/optimizeBatch/*.inp
 
 # Ignored files for SMINA Batch program
 /smina/*.sdf
 /smina/*.pdb
 /smina/*.log
 /smina/output/
+/smina/README
+/smina/smina.static
