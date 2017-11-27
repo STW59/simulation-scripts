@@ -30,11 +30,11 @@ VERSION = "01"  # Version number for gamess
 
 # Logging constants
 DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
-LOGGING_LEVEL = logging.DEBUG
+LOGGING_LEVEL = logging.INFO
 
 # Basis Set constants
-# "Basis set": (GBASIS, NGAUSS, NDFUNC)
 B3LYP_BASIS_SETS = ["4-31G", "5-31G", "6-31G", "6-31G(d)"]
+# "Basis set": (GBASIS, NGAUSS, NDFUNC)
 B3LYP_BASIS_DICT = {"4-31G": ("N31", "4", ""),
                     "5-31G": ("N31", "5", ""),
                     "6-31G": ("N31", "6", ""),
@@ -151,6 +151,7 @@ def remove_residuals(name):
 
 
 def main():
+    batch_start_time = time.time()
     # Set up log file for batch process.
     # NOTE: this is different than the gamess .log files.
     log_filename = DATETIME + ".log"
@@ -193,7 +194,7 @@ def main():
             except IndexError:
                 logging.info("All basis sets complete.")
                 # Process next data set
-                return
+                continue
 
             # Determine file names
             name = input_file.split("Input.inp")[0]
@@ -253,7 +254,10 @@ def main():
 
             input_file = new_input_name
 
+    batch_end_time = time.time()
     logging.info("Batch process complete.")
+    logging.info("Total batch processing time: {} hours"
+                 .format((batch_end_time - batch_start_time) / (60 * 60)))
 
 
 main()
