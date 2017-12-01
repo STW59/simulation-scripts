@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 22NOV2017
+Last updated : 01DEC2017
 
 This script is designed to run all gamess .inp files as a series of energy
 optimizations running through different levels of DFT basis sets.
@@ -33,12 +33,25 @@ DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
 LOGGING_LEVEL = logging.INFO
 
 # Basis Set constants
-B3LYP_BASIS_SETS = ["4-31G", "5-31G", "6-31G", "6-31G(d)"]
-# "Basis set": (GBASIS, NGAUSS, NDFUNC)
-B3LYP_BASIS_DICT = {"4-31G": ("N31", "4", ""),
-                    "5-31G": ("N31", "5", ""),
-                    "6-31G": ("N31", "6", ""),
-                    "6-31G(d)": ("N31", "6", "1")}
+# Processing order for basis sets.
+B3LYP_BASIS_SETS = ["4-31G",
+                    "5-31G",
+                    "6-31G",
+                    "6-311G",
+                    "6-311G(d)",
+                    "6-311G(d,p)",
+                    "6-311+G(d,p)",
+                    "6-311++G(d,p)"]  # TODO: Add test conditions for CCnWC -> ACCnWC and PCseg-n -> APCseg-n basis sets
+# Parameters for basis sets
+# "Basis set": (GBASIS, NGAUSS, NDFUNC, NPFUNC, DIFFSP, DIFFS)
+B3LYP_BASIS_DICT = {"4-31G": ("N31", "4", "", "", "", ""),
+                    "5-31G": ("N31", "5", "", "", "", ""),
+                    "6-31G": ("N31", "6", "", "", "", ""),
+                    "6-311G": ("N311", "5", "", "", "", ""),
+                    "6-311G(d)": ("N311", "6", "1", "", "", ""),
+                    "6-311G(d,p)": ("N311", "6", "1", "1", "", ""),
+                    "6-311+G(d,p)": ("N311", "6", "1", "1", ".TRUE.", ""),
+                    "6-311++G(d,p)": ("N311", "6", "1", "1", ".TRUE.", ".TRUE.")}
 
 
 def build_data_sets():
@@ -199,7 +212,7 @@ def main():
             # Determine file names
             name = input_file.split("Input.inp")[0]
             old_input_name = input_file
-            new_input_name = name + next_basis_set + "-Input.inp"
+            new_input_name = name + "-" + str(basis_set_index) + "-Input.inp"
             gamess_output_name = name + "Output.log"
 
             # Check to see if gamess "exited gracefully"
@@ -225,21 +238,46 @@ def main():
             new_input_file = open(new_input_name, 'w')
 
             # Write new gamess input file
+            header_line_index = 0
             for header_line in gamess_header:
                 if "$BASIS" in header_line:
-                    if next_basis_set is "6-31G(d)":
-                        new_line = " $BASIS GBASIS={} NGAUSS={} NDFUNC={} $END\n"\
-                            .format(B3LYP_BASIS_DICT[next_basis_set][0],
-                                    B3LYP_BASIS_DICT[next_basis_set][1],
-                                    B3LYP_BASIS_DICT[next_basis_set][2])
-                    else:
-                        new_line = " $BASIS GBASIS={} NGAUSS={} $END\n"\
-                            .format(B3LYP_BASIS_DICT[next_basis_set][0],
-                                    B3LYP_BASIS_DICT[next_basis_set][1],
-                                    B3LYP_BASIS_DICT[next_basis_set][2])
-                    new_input_file.write(new_line)
+                    new_line = " $BASIS GBASIS={} NGAUSS={} "\
+                        .format(B3LYP_BASIS_DICT[next_basis_set][0],
+                                B3LYP_BASIS_DICT[next_basis_set][1])
+
+                    # Add heavy atom polarization
+                    if "d" in next_basis_set:
+                        new_line += "NDFUNC={} ".format(B3LYP_BASIS_DICT[next_basis_set][2])
+
+                    # Add hydrogen polarization
+                    if "p" in next_basis_set:
+                        new_line += "NPFUNC={} ".format(B3LYP_BASIS_DICT[next_basis_set][3])
+
+                    # Add heavy atom diffuse functions
+                    if "1+g" in next_basis_set:
+                        new_line += "DIFFSP={} ".format(B3LYP_BASIS_DICT[next_basis_set][4])
+
+                    # Add hydrogen diffuse functions
+                    if "1++g" in next_basis_set:
+                        new_line += "DIFFS={}".format(B3LYP_BASIS_DICT[next_basis_set][5])
+
+                    new_line += "$END\n"
+                elif "$CONTRL" in header_line:
+                    new_line = " $CONTRL SCFTYP=RHF RUNTYP=OPTIMIZE DFTTYP=B3LYP "
+
+                    # Convert from cartesian to internal coordinates
+                    # if basis_set_index == len(B3LYP_BASIS_SETS)-1:
+                    #     new_line += "COORD=ZMT "
+
+                    new_line += "$END\n"
+                elif header_line_index == len(B3LYP_BASIS_SETS)-2:
+                    # Append latest basis set to title
+                    new_line = header_line + next_basis_set
                 else:
-                    new_input_file.write(header_line)
+                    new_line = header_line
+
+                new_input_file.write(new_line)
+                header_line_index += 1
 
             coord_line = 0
             for coordinate in atom_coords:
