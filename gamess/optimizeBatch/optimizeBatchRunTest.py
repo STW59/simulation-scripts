@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 01DEC2017
+Last updated : 04DEC2017
 
 This script is designed to run all gamess .inp files as a series of energy
 optimizations running through different levels of DFT basis sets.
@@ -81,7 +81,7 @@ def build_data_sets():
 def build_next_input(name, basis_set_index, next_basis_set):
     gamess_output_name = name + "Output.log"
     new_input_name = name + str(basis_set_index) + "-Input.inp"
-    old_input_name = name + "Input.log"
+    old_input_name = name + "Input.inp"
 
     # Read required data from files
     gamess_header = read_gamess_header(old_input_name)
@@ -107,12 +107,12 @@ def build_next_input(name, basis_set_index, next_basis_set):
                 new_line += "NPFUNC={} ".format(B3LYP_BASIS_DICT[next_basis_set][3])
 
             # Add heavy atom diffuse functions
-            if "1+g" in next_basis_set:
+            if "+" in next_basis_set:
                 new_line += "DIFFSP={} ".format(B3LYP_BASIS_DICT[next_basis_set][4])
 
             # Add hydrogen diffuse functions
-            if "1++g" in next_basis_set:
-                new_line += "DIFFS={}".format(B3LYP_BASIS_DICT[next_basis_set][5])
+            if "++" in next_basis_set:
+                new_line += "DIFFS={} ".format(B3LYP_BASIS_DICT[next_basis_set][5])
 
             new_line += "$END\n"
         elif "$CONTRL" in header_line:
@@ -123,9 +123,9 @@ def build_next_input(name, basis_set_index, next_basis_set):
             #     new_line += "COORD=ZMT "
 
             new_line += "$END\n"
-        elif header_line_index == len(B3LYP_BASIS_SETS) - 2:
+        elif header_line_index == len(gamess_header) - 2:
             # Append latest basis set to title
-            new_line = header_line + next_basis_set
+            new_line = header_line.split("\n")[0] + " " + next_basis_set + "\n"
         else:
             new_line = header_line
 
@@ -190,7 +190,7 @@ def main():
 
             # Determine file names
             name = input_file.split("Input.inp")[0]
-            new_input_name = name + "-" + str(basis_set_index) + "-Input.inp"
+            new_input_name = name + str(basis_set_index) + "-Input.inp"
             gamess_output_name = name + "Output.log"
 
             # Check to see if gamess "exited gracefully"
@@ -267,7 +267,7 @@ def read_atom_coords(gamess_output_name):
             while True:
                 for selected_line in gamess_output:
                     if selected_line is not "\n":
-                        atom_coords.append(output_line)
+                        atom_coords.append(selected_line)
                     else:
                         logging.debug("Extracted atom coordinates from gamess output file.")
                         gamess_output.close()
