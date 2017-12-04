@@ -1,8 +1,10 @@
 
 # General files for PyCharm
+.idea/codeStyles/
 /.idea/codeStyleSettings.xml
 .idea/dictionaries/
 /.idea/misc.xml
+/.idea/modules.xml
 /.idea/simulation-scripts.iml
 /.idea/workspace.xml
 

@@ -3,6 +3,8 @@
 Written by Stephen E. White
 Last updated : 04DEC2017
 
+TEST FILE FOR CHANGES TO optimizeBatchRun.py
+
 This script is designed to run all gamess .inp files as a series of energy
 optimizations running through different levels of DFT basis sets.
 
@@ -11,7 +13,7 @@ script is run. It will not double-process data if a .log file for the data
 set is present.
 
 To run this script:
-sudo python3 optimizeBatchRun.py
+sudo python3 optimizeBatchRunTest.py
 In linux, always run this script as a superuser (su or sudo).
 """
 
@@ -41,7 +43,7 @@ B3LYP_BASIS_SETS = ["4-31G",
                     "6-311G(d)",
                     "6-311G(d,p)",
                     "6-311+G(d,p)",
-                    "6-311++G(d,p)"]  # TODO: Add test conditions for CCnWC -> ACCnWC and PCseg-n -> APCseg-n basis sets
+                    "6-311++G(d,p)"]
 # Parameters for basis sets
 # "Basis set": (GBASIS, NGAUSS, NDFUNC, NPFUNC, DIFFSP, DIFFS)
 B3LYP_BASIS_DICT = {"4-31G": ("N31", "4", "", "", "", ""),
