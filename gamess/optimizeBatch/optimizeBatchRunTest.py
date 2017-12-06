@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 04DEC2017
+Last updated : 06DEC2017
 
 TEST FILE FOR CHANGES TO optimizeBatchRun.py
 
@@ -17,12 +17,15 @@ sudo python3 optimizeBatchRunTest.py
 In linux, always run this script as a superuser (su or sudo).
 """
 
+from basisSets import *
 import datetime
 import logging
 import os
 import shutil
 import subprocess
+import sys
 import time
+
 
 # Constants that should be edited based on your system
 PATH_TO_GAMESS = "/home/asher/Programs/gamess/"  # Full path to gamess folder
@@ -34,26 +37,10 @@ VERSION = "01"  # Version number for gamess
 DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
 LOGGING_LEVEL = logging.INFO
 
-# Basis Set constants
-# Processing order for basis sets.
-B3LYP_BASIS_SETS = ["4-31G",
-                    "5-31G",
-                    "6-31G",
-                    "6-311G",
-                    "6-311G(d)",
-                    "6-311G(d,p)",
-                    "6-311+G(d,p)",
-                    "6-311++G(d,p)"]
-# Parameters for basis sets
-# "Basis set": (GBASIS, NGAUSS, NDFUNC, NPFUNC, DIFFSP, DIFFS)
-B3LYP_BASIS_DICT = {"4-31G": ("N31", "4", "", "", "", ""),
-                    "5-31G": ("N31", "5", "", "", "", ""),
-                    "6-31G": ("N31", "6", "", "", "", ""),
-                    "6-311G": ("N311", "5", "", "", "", ""),
-                    "6-311G(d)": ("N311", "6", "1", "", "", ""),
-                    "6-311G(d,p)": ("N311", "6", "1", "1", "", ""),
-                    "6-311+G(d,p)": ("N311", "6", "1", "1", ".TRUE.", ""),
-                    "6-311++G(d,p)": ("N311", "6", "1", "1", ".TRUE.", ".TRUE.")}
+# Program constants
+BASIS_SET = "Pople"
+# BASIS_SET = "Correlation"
+# BASIS_SET = "Polarization"
 
 
 def build_data_sets():
@@ -97,31 +84,31 @@ def build_next_input(name, basis_set_index, next_basis_set):
     for header_line in gamess_header:
         if "$BASIS" in header_line:
             new_line = " $BASIS GBASIS={} NGAUSS={} " \
-                .format(B3LYP_BASIS_DICT[next_basis_set][0],
-                        B3LYP_BASIS_DICT[next_basis_set][1])
+                .format(selected_basis_set[next_basis_set][0],
+                        selected_basis_dict[next_basis_set][1])
 
             # Add heavy atom polarization
             if "d" in next_basis_set:
-                new_line += "NDFUNC={} ".format(B3LYP_BASIS_DICT[next_basis_set][2])
+                new_line += "NDFUNC={} ".format(selected_basis_dict[next_basis_set][2])
 
             # Add hydrogen polarization
             if "p" in next_basis_set:
-                new_line += "NPFUNC={} ".format(B3LYP_BASIS_DICT[next_basis_set][3])
+                new_line += "NPFUNC={} ".format(selected_basis_dict[next_basis_set][3])
 
             # Add heavy atom diffuse functions
             if "+" in next_basis_set:
-                new_line += "DIFFSP={} ".format(B3LYP_BASIS_DICT[next_basis_set][4])
+                new_line += "DIFFSP={} ".format(selected_basis_dict[next_basis_set][4])
 
             # Add hydrogen diffuse functions
             if "++" in next_basis_set:
-                new_line += "DIFFS={} ".format(B3LYP_BASIS_DICT[next_basis_set][5])
+                new_line += "DIFFS={} ".format(selected_basis_dict[next_basis_set][5])
 
             new_line += "$END\n"
         elif "$CONTRL" in header_line:
-            new_line = " $CONTRL SCFTYP=RHF RUNTYP=OPTIMIZE DFTTYP=B3LYP "
+            new_line = " $CONTRL SCFTYP=RHF RUNTYP=OPTIMIZE DFTTYP=POPLE "
 
             # Convert from cartesian to internal coordinates
-            # if basis_set_index == len(B3LYP_BASIS_SETS)-1:
+            # if basis_set_index == len(selected_basis_set)-1:
             #     new_line += "COORD=ZMT "
 
             new_line += "$END\n"
@@ -160,6 +147,9 @@ def main():
     logging.info("Beginning log for batch started {}."
                  .format(DATETIME.replace("_", ":")))
 
+    # Set basis set
+    set_basis_set()
+
     # Read all files in working directory
     data_sets = build_data_sets()
 
@@ -168,7 +158,7 @@ def main():
         # Generates gamess inputs for each of the given basis sets
         # Subsequently runs the gamess calculations for the inputs
         basis_set_index = 0
-        for basis_set in B3LYP_BASIS_SETS:
+        for basis_set in selected_basis_set:
             logging.info("Beginning gamess job for {} with {} basis set."
                          .format(input_file, basis_set))
 
@@ -184,7 +174,7 @@ def main():
             try:
                 # Determine next basis set
                 basis_set_index += 1
-                next_basis_set = B3LYP_BASIS_SETS[basis_set_index]
+                next_basis_set = selected_basis_set[basis_set_index]
             except IndexError:
                 logging.info("All basis sets complete.")
                 # Process next data set
@@ -304,6 +294,22 @@ def remove_residuals(name):
             os.remove(os.path.join(TEMP_BINARY_DIR, file))
             logging.warning("Removed {} from temporary binary directory."
                             .format(file))
+
+
+def set_basis_set():
+    global selected_basis_set, selected_basis_dict
+    if BASIS_SET == "Pople":
+        selected_basis_set = Pople.pople_basis_sets
+        selected_basis_dict = Pople.pople_basis_dict
+    elif BASIS_SET == "Correlation":
+        selected_basis_set = Correlation.correlation_basis_sets
+        selected_basis_dict = Correlation.correlation_basis_dict
+    elif BASIS_SET == "Polarization":
+        selected_basis_set = Polarization.polarization_basis_sets
+        selected_basis_dict = Polarization.polarization_basis_dict
+    else:
+        logging.warning("Invalid basis set selected. Terminating process.")
+        sys.exit()
 
 
 main()
