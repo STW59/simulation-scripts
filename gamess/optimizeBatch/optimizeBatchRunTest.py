@@ -105,7 +105,7 @@ def build_next_input(name, basis_set_index, next_basis_set):
 
             new_line += "$END\n"
         elif "$CONTRL" in header_line:
-            new_line = " $CONTRL SCFTYP=RHF RUNTYP=OPTIMIZE DFTTYP=POPLE "
+            new_line = " $CONTRL SCFTYP=RHF RUNTYP=OPTIMIZE DFTTYP=B3LYP "
 
             # Convert from cartesian to internal coordinates
             # if basis_set_index == len(selected_basis_set)-1:
