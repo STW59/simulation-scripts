@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 Written by Stephen E. White
-Last updated : 06DEC2017
+Last updated : 13DEC2017
 
 TEST FILE FOR CHANGES TO optimizeBatchRun.py
 
@@ -201,7 +201,7 @@ def main():
             # Build next GAMESS input file
             logging.info("Generating input for {} basis set.".format(next_basis_set))
             build_next_input(name, basis_set_index, next_basis_set)
-            logging.info("Input generation complete.")
+            logging.debug("Input generation complete.")
 
             input_file = new_input_name
 
@@ -236,14 +236,14 @@ def process_data(input_file, number_of_processors=4):
     subprocess.call(["./rungms", input_file, VERSION,
                      str(number_of_processors)], stdout=output_log)
     output_log.close()
-    logging.info("gamess process complete.")
+    logging.debug("gamess process complete.")
 
     # Clean up files from run and copy output to input directory
     try:
         os.remove(os.path.join(PATH_TO_GAMESS, input_file))
         shutil.copyfile(os.path.join(PATH_TO_GAMESS, output_name),
                         os.path.join(input_directory, output_name))
-        logging.info("Output file copied to starting directory.")
+        logging.debug("Output file copied to starting directory.")
         os.remove(os.path.join(PATH_TO_GAMESS, output_name))
     except FileNotFoundError:
         logging.warning("Output file not found.")
